@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sabor & Cia - Cardápio Digital</title>
+    <style>
+        :root { --primary: #ff6600; --dark: #000000; --card-bg: #1a1a1a; --text: #ffffff; --accent: #ff8533; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--dark); color: var(--text); margin: 0; padding-bottom: 100px; }
+        
+        /* Cabeçalho Profissional */
+        header { background: linear-gradient(180deg, #111 0%, #000 100%); padding: 30px 20px; text-align: center; border-bottom: 3px solid var(--primary); box-shadow: 0 4px 10px rgba(255,102,0,0.2); }
+        .logo { color: var(--primary); font-size: 2.2rem; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; margin: 0; }
+        .sublogo { color: #888; font-size: 0.85rem; margin-top: 5px; text-transform: uppercase; }
+
+        /* Botão ADM Discreto */
+        .admin-trigger { position: absolute; top: 10px; right: 10px; color: #333; font-size: 0.7rem; text-decoration: none; cursor: pointer; }
+
+        /* Conteúdo */
+        .container { padding: 15px; max-width: 500px; margin: auto; }
+        .categoria-box { margin-top: 30px; }
+        .categoria-titulo { color: var(--primary); font-size: 1.2rem; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        
+        /* Cards de Itens */
+        .card-item { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #333; transition: 0.3s; }
+        .card-item:active { transform: scale(0.98); background: #222; }
+        .card-item.selecionado { border-left-color: var(--primary); background: #262626; }
+        
+        .item-info { flex: 1; }
+        .item-nome { font-weight: bold; font-size: 1.05rem; display: block; margin-bottom: 4px; }
+        .item-preco { color: var(--primary); font-weight: bold; font-size: 0.95rem; }
+
+        /* Botão de Adicionar */
+        .btn-add { background: var(--primary); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 1.5rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        /* Rodapé / Carrinho */
+        .footer-cart { position: fixed; bottom: 0; width: 100%; background: #000; padding: 20px; border-top: 2px solid var(--primary); display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); z-index: 999; box-sizing: border-box; }
+        .total-info { line-height: 1.2; }
+        .total-label { font-size: 0.8rem; color: #888; text-transform: uppercase; }
+        .total-valor { font-size: 1.4rem; font-weight: bold; color: var(--primary); }
+        
+        .btn-whatsapp { background: #25d366; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 1rem; cursor: pointer; }
+
+        /* Modais */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; overflow-y: auto; }
+        .modal-content { padding: 30px 20px; max-width: 450px; margin: auto; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; background: #222; border: 1px solid #444; color: white; border-radius: 6px; box-sizing: border-box; }
+        .btn-save { background: var(--primary); width: 100%; padding: 15px; border: none; color: white; font-weight: bold; border-radius: 6px; margin-top: 10px; cursor: pointer; }
+        .btn-close { background: #333; width: 100%; padding: 10px; border: none; color: white; margin-top: 10px; border-radius: 6px; cursor: pointer; }
+        
+        .item-adm { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #222; font-size: 0.9rem; }
+        .btn-del { color: #ff4444; background: none; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="admin-trigger" onclick="abrirLogin()">ADMIN</div>
+
+<header>
+    <h1 class="logo">Sabor & Cia</h1>
+    <div class="sublogo">Presidente Getúlio - SC</div>
+</header>
+
+<div class="container" id="menu-cliente">
+    </div>
+
+<div class="footer-cart">
+    <div class="total-info">
+        <span class="total-label">Seu Pedido</span>
+        <div class="total-valor" id="total-carrinho">R$ 0,00</div>
+    </div>
+    <button class="btn-whatsapp" onclick="enviarPedido()">
+        Pedir no WhatsApp
+    </button>
+</div>
+
+<div id="modal-login" class="modal">
+    <div class="modal-content">
+        <h2 style="color: var(--primary)">Acesso Restrito</h2>
+        <input type="password" id="pass-input" placeholder="Digite a senha ADM">
+        <button class="btn-save" onclick="checarSenha()">Entrar no Painel</button>
+        <button class="btn-close" onclick="fecharModais()">Cancelar</button>
+    </div>
+</div>
+
+<div id="modal-adm" class="modal">
+    <div class="modal-content">
+        <h2 style="color: var(--primary)">Gerenciar Cardápio</h2>
+        
+        <div style="background: #111; padding: 15px; border-radius: 8px; border: 1px solid #333;">
+            <label>Nome do Prato/Ingrediente:</label>
+            <input type="text" id="add-nome" placeholder="Ex: Arroz Branco ou Marmita Fit">
+            <label>Preço (0 para ingredientes montáveis):</label>
+            <input type="number" id="add-preco" placeholder="0.00">
+            <label>Categoria:</label>
+            <select id="add-cat">
+                <option value="Marmitas Prontas">Marmitas Prontas</option>
+                <option value="Proteínas">Proteínas</option>
+                <option value="Acompanhamentos">Acompanhamentos</option>
+                <option value="Bebidas">Bebidas</option>
+            </select>
+            <button class="btn-save" onclick="adicionarItem()">Salvar no Sistema</button>
+        </div>
+
+        <h3 style="margin-top: 30px;">Itens Cadastrados</h3>
+        <div id="lista-adm"></div>
+        
+        <button class="btn-close" onclick="fecharModais()" style="background: var(--primary)">Voltar para o Cardápio</button>
+    </div>
+</div>
+
+<script>
+    // --- CONFIGURAÇÕES ---
+    const MINHA_SENHA = "19019523";
+    const MEU_WHATSAPP = "5547997909412"; // Seu número configurado!
+    
+    let itens = JSON.parse(localStorage.getItem('sabor_cia_data')) || [
+        {id: 1, nome: "Marmita Fit Frango", preco: 22.00, cat: "Marmitas Prontas"},
+        {id: 2, nome: "Frango Grelhado", preco: 0, cat: "Proteínas"},
+        {id: 3, nome: "Arroz Integral", preco: 0, cat: "Acompanhamentos"}
+    ];
+
+    let pedido = [];
+
+    // --- FUNÇÕES DE NAVEGAÇÃO ---
+    function abrirLogin() { document.getElementById('modal-login').style.display = 'block'; }
+    function fecharModais() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+
+    function checarSenha() {
+        if(document.getElementById('pass-input').value === MINHA_SENHA) {
+            fecharModais();
+            document.getElementById('modal-adm').style.display = 'block';
+            renderAdm();
+        } else {
+            alert("Senha incorreta!");
+        }
+    }
+
+    // --- GERENCIAMENTO ADM ---
+    function adicionarItem() {
+        const nome = document.getElementById('add-nome').value;
+        const preco = parseFloat(document.getElementById('add-preco').value || 0);
+        const cat = document.getElementById('add-cat').value;
+
+        if(nome) {
+            itens.push({id: Date.now(), nome, preco, cat});
+            salvar();
+            renderCardapio();
+            renderAdm();
+            document.getElementById('add-nome').value = '';
+            document.getElementById('add-preco').value = '';
+        }
+    }
+
+    function removerItem(id) {
+        itens = itens.filter(i => i.id !== id);
+        salvar();
+        renderCardapio();
+        renderAdm();
+    }
+
+    function salvar() { localStorage.setItem('sabor_cia_data', JSON.stringify(itens)); }
+
+    // --- LOGICA DO CLIENTE ---
+    function renderCardapio() {
+        const menu = document.getElementById('menu-cliente');
+        menu.innerHTML = "";
+        
+        const categorias = ["Marmitas Prontas", "Proteínas", "Acompanhamentos", "Bebidas"];
+        
+        categorias.forEach(c => {
+            const itensDaCat = itens.filter(i => i.cat === c);
+            if(itensDaCat.length > 0) {
+                let html = `<div class="categoria-box"><div class="categoria-titulo">${c}</div>`;
+                itensDaCat.forEach(item => {
+                    html += `
+                        <div class="card-item" id="item-${item.id}">
+                            <div class="item-info">
+                                <span class="item-nome">${item.nome}</span>
+                                <span class="item-preco">${item.preco > 0 ? 'R$ '+item.preco.toFixed(2) : 'Adicional'}</span>
+                            </div>
+                            <button class="btn-add" onclick="togglePedido(${item.id})">+</button>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                menu.innerHTML += html;
+            }
+        });
+    }
+
+    function togglePedido(id) {
+        const item = itens.find(i => i.id === id);
+        pedido.push(item);
+        
+        // Efeito visual
+        document.getElementById(`item-${id}`).classList.add('selecionado');
+        setTimeout(() => document.getElementById(`item-${id}`).classList.remove('selecionado'), 300);
+
+        const total = pedido.reduce((acc, i) => acc + i.preco, 0);
+        document.getElementById('total-carrinho').innerText = `R$ ${total.toFixed(2)}`;
+    }
+
+    function renderAdm() {
+        const lista = document.getElementById('lista-adm');
+        lista.innerHTML = "";
+        itens.forEach(i => {
+            lista.innerHTML += `
+                <div class="item-adm">
+                    <span>${i.nome} - R$ ${i.preco.toFixed(2)}</span>
+                    <button class="btn-del" onclick="removerItem(${i.id})">Remover</button>
+                </div>
+            `;
+        });
+    }
+
+    function enviarPedido() {
+        if(pedido.length === 0) return alert("Selecione pelo menos um item!");
+
+        let msg = `*PEDIDO SABOR & CIA*\n--------------------------\n`;
+        pedido.forEach(i => {
+            msg += `• ${i.nome}\n`;
+        });
+        const total = pedido.reduce((acc, i) => acc + i.preco, 0);
+        msg += `--------------------------\n*TOTAL: R$ ${total.toFixed(2)}*\n\n_Vou querer esses itens, por favor!_`;
+        
+        const url = `https://api.whatsapp.com/send?phone=${MEU_WHATSAPP}&text=${encodeURIComponent(msg)}`;
+        window.open(url, '_blank');
+        
+        // Limpa pedido após enviar
+        pedido = [];
+        document.getElementById('total-carrinho').innerText = `R$ 0,00`;
+    }
+
+    // Iniciar sistema
+    renderCardapio();
+</script>
+
+</body>
+  </html>
