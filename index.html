@@ -3,256 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sabor & Cia - Marmitas Congeladas</title>
+    <title>Sabor & Cia - Cardápio Digital</title>
     <style>
-        :root { --primary: #ff6600; --dark: #000; --card: #1a1a1a; --text: #fff; --success: #25d366; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: var(--text); margin: 0; padding-bottom: 140px; }
-        
-        header { background: #000; padding: 20px; text-align: center; border-bottom: 3px solid var(--primary); }
-        .logo { color: var(--primary); font-size: 1.8rem; font-weight: 900; text-transform: uppercase; margin: 0; }
-        .banner { background: #333; color: var(--primary); font-size: 0.75rem; text-align: center; padding: 5px; font-weight: bold; }
-
+        :root { --primary: #ff6600; --dark: #2c3e50; --bg: #f4f4f4; --success: #27ae60; }
+        body { font-family: sans-serif; margin: 0; background: var(--bg); padding-bottom: 120px; color: var(--dark); }
+        header { background: var(--dark); color: white; text-align: center; padding: 20px; border-bottom: 5px solid var(--primary); }
+        .banner { background: var(--primary); color: white; text-align: center; padding: 10px; font-weight: bold; font-size: 0.9rem; }
         .container { padding: 15px; max-width: 500px; margin: auto; }
-        
-        /* CAIXA DE MONTAGEM FIXA NO TOPO */
-        .sticky-builder { 
-            position: sticky; 
-            top: 0; 
-            z-index: 1000; 
-            background: rgba(0,0,0,0.9); 
-            padding: 10px 0;
-            margin-bottom: 20px;
-        }
-        .builder-box { 
-            background: #222; 
-            border: 2px solid var(--primary); 
-            border-radius: 15px; 
-            padding: 15px; 
-            margin: 0 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
-        }
-        .builder-status { font-size: 1rem; font-weight: bold; margin-bottom: 10px; color: var(--primary); text-align: center; }
-        .itens-selecionados { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; min-height: 35px; margin-bottom: 10px; }
-        .tag-item { background: var(--primary); color: #000; padding: 5px 10px; border-radius: 15px; font-weight: bold; font-size: 0.85rem; animation: pop 0.3s ease; }
-        @keyframes pop { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
-
-        .btn-concluir { background: #27ae60; color: white; border: none; width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; display: none; }
-
-        /* LISTAGEM */
-        .categoria-title { color: var(--primary); font-size: 1.1rem; margin: 25px 0 10px; border-left: 4px solid var(--primary); padding-left: 10px; }
-        .item-card { background: var(--card); border: 1px solid #333; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .btn-add { background: var(--primary); color: #000; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-
-        /* RODAPÉ */
-        .footer { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 3px solid var(--primary); padding: 15px; box-sizing: border-box; z-index: 1001; }
-        .resumo-info { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; }
-        .btn-whatsapp { background: var(--success); color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 1.2rem; cursor: pointer; }
-
-        /* MODAIS */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .modal-content { max-width: 450px; margin: 20px auto; background: #1a1a1a; padding: 20px; border-radius: 15px; border: 1px solid var(--primary); }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #222; color: #fff; border: 1px solid #444; border-radius: 5px; box-sizing: border-box; font-size: 1rem;}
-        
-        .delivery-options { display: flex; gap: 10px; margin: 15px 0; }
-        .opt-btn { flex: 1; padding: 15px; background: #333; border: 2px solid transparent; border-radius: 10px; color: #fff; cursor: pointer; font-weight: bold; text-align: center; }
-        .opt-btn.active { border-color: var(--primary); background: #222; }
-
-        .adm-btn { position: absolute; top: 10px; right: 10px; color: #333; font-size: 0.7rem; cursor: pointer; }
+        .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #ddd; }
+        .btn-add { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-aleatorio { background: var(--dark); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 15px; }
+        .footer { position: fixed; bottom: 0; width: 100%; background: white; padding: 15px; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
+        .btn-zap { background: var(--success); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; width: 50%; }
+        .item-car { background: #fff; padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary); font-size: 0.9rem; position: relative; }
+        input, select, textarea { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        .remove { color: red; font-weight: bold; position: absolute; right: 10px; top: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="adm-btn" onclick="loginAdm()">ADMIN</div>
-<div class="banner">7 MARMITAS: R$ 150 | 15 MARMITAS: R$ 290</div>
-
 <header>
-    <h1 class="logo">Sabor & Cia</h1>
-    <div style="font-size: 0.8rem; color: #666;">Presidente Getúlio - SC</div>
+    <h1 style="margin:0">SABOR & CIA</h1>
+    <small>Marmitas 500ml - Presidente Getúlio - SC</small>
 </header>
 
-<div class="sticky-builder">
-    <div class="builder-box">
-        <div class="builder-status" id="builder-msg">Escolha a Proteína 👇</div>
-        <div class="itens-selecionados" id="visual-itens"></div>
-        <button class="btn-concluir" id="btn-fechar" onclick="concluirMarmita()">✅ CONCLUIR ESTA MARMITA</button>
-    </div>
+<div class="banner">
+    🍱 7 POR R$ 100 | 15 POR R$ 200 (Ou R$ 15 un.)
 </div>
 
 <div class="container">
-    <div id="lista-menu"></div>
+    <h3>1. Como deseja receber?</h3>
+    <select id="metodo-envio">
+        <option value="Entrega">Entrega (Informar endereço no Zap)</option>
+        <option value="Retirada">Vou retirar no balcão</option>
+    </select>
+
+    <h3 style="margin-top:20px;">2. Monte sua Marmita:</h3>
+    <div class="card">
+        <label><b>Escolha a Proteína:</b></label>
+        <select id="prod-nome">
+            <option value="Frango Grelhado">Frango Grelhado</option>
+            <option value="Carne Moída">Carne Moída</option>
+            <option value="Linguiça Toscana">Linguiça Toscana</option>
+        </select>
+        <label><b>Observações (Ex: Sem cebola, dobro de arroz):</b></label>
+        <textarea id="prod-obs" placeholder="Alguma restrição ou alteração?"></textarea>
+        <button class="btn-add" onclick="addMarmita()">+ ADICIONAR MARMITA (R$ 15,00)</button>
+    </div>
+
+    <button class="btn-aleatorio" onclick="addAleatorio()">🎲 MONTAR COMBO ALEATÓRIO</button>
+
+    <h3 style="margin-top:20px;">Seu Pedido:</h3>
+    <div id="lista-carrinho">Carrinho vazio...</div>
 </div>
 
 <div class="footer">
-    <div class="resumo-info">
-        <div>
-            <div id="count-marmitas" style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">0 Marmitas</div>
-        </div>
-        <div style="text-align: right;">
-            <div id="txt-promo" style="font-size: 0.7rem; color: var(--success); font-weight: bold;"></div>
-            <div id="valor-total" style="font-size: 1.6rem; font-weight: bold;">R$ 0,00</div>
-        </div>
+    <div style="width: 45%;">
+        <small>TOTAL</small><br>
+        <b id="total-txt" style="font-size: 1.4rem;">R$ 0,00</b>
     </div>
-    <button class="btn-whatsapp" onclick="abrirCheckout()">FINALIZAR PEDIDO</button>
-</div>
-
-<div id="modal-checkout" class="modal">
-    <div class="modal-content">
-        <h2 style="color:var(--primary); margin-top:0;">Finalizar Pedido</h2>
-        <div class="delivery-options">
-            <div class="opt-btn" id="btn-entrega" onclick="setMetodo('Entrega')">ENTREGA</div>
-            <div class="opt-btn" id="btn-retirada" onclick="setMetodo('Retirada')">RETIRADA</div>
-        </div>
-
-        <div id="form-endereco" style="display:none;">
-            <input type="text" id="cli-nome" placeholder="Seu Nome">
-            <input type="text" id="cli-bairro" placeholder="Bairro">
-            <input type="text" id="cli-rua" placeholder="Rua">
-            <input type="text" id="cli-num" placeholder="Número">
-        </div>
-
-        <button onclick="enviarZap()" style="width:100%; padding:15px; background:var(--success); color:#fff; border:none; border-radius:10px; font-weight:bold; margin-top:15px; font-size:1.1rem;">ENVIAR PARA WHATSAPP</button>
-        <button onclick="fecharCheckout()" style="width:100%; padding:10px; background:transparent; color:#888; border:none; margin-top:10px;">Voltar</button>
-    </div>
-</div>
-
-<div id="modal-adm" class="modal">
-    <div class="modal-content">
-        <h2>Painel ADM</h2>
-        <input type="text" id="adm-nome" placeholder="Nome do Item">
-        <input type="number" id="adm-preco" placeholder="Preço (Somente p/ sucos/sobremesas)">
-        <select id="adm-cat">
-            <option value="Proteína">Proteína (Máx 1)</option>
-            <option value="Acompanhamento">Acompanhamento</option>
-            <option value="Extra">Sucos / Sobremesas</option>
-        </select>
-        <button onclick="salvarItem()" style="width:100%; padding:15px; background:var(--primary); border:none; font-weight:bold; border-radius:8px;">SALVAR</button>
-        <div id="adm-itens-lista" style="margin-top:20px;"></div>
-        <button onclick="document.getElementById('modal-adm').style.display='none'" style="width:100%; padding:10px; background:#333; color:#fff; border:none; margin-top:10px;">FECHAR</button>
-    </div>
+    <button class="btn-zap" onclick="enviarZap()">FINALIZAR PEDIDO</button>
 </div>
 
 <script>
-    const TEL_ZAP = "5547997909412";
-    const PASS_ADM = "19019523";
-    let metodo = ""; 
+    let carrinho = [];
+    const sabores = ["Frango Grelhado", "Carne Moída", "Linguiça Toscana"];
 
-    let bancoDados = JSON.parse(localStorage.getItem('saborecia_db')) || [
-        {nome: "Frango", preco: 0, cat: "Proteína"},
-        {nome: "Carne moída", preco: 0, cat: "Proteína"},
-        {nome: "Toscana", preco: 0, cat: "Proteína"},
-        {nome: "Feijão", preco: 0, cat: "Acompanhamento"},
-        {nome: "Arroz branco", preco: 0, cat: "Acompanhamento"},
-        {nome: "Macarrão", preco: 0, cat: "Acompanhamento"}
-    ];
+    function addMarmita() {
+        const nome = document.getElementById('prod-nome').value;
+        const obs = document.getElementById('prod-obs').value || "Padrão";
+        carrinho.push({ nome, obs });
+        document.getElementById('prod-obs').value = ""; // limpa obs
+        render();
+    }
 
-    let carrinhoMarmitas = []; 
-    let extrasSelecionados = []; 
-    let montandoAgora = [];
+    function addAleatorio() {
+        const qtd = prompt("Quantas marmitas aleatórias deseja adicionar?", "7");
+        if (qtd > 0) {
+            for (let i = 0; i < qtd; i++) {
+                const sorteio = sabores[Math.floor(Math.random() * sabores.length)];
+                carrinho.push({ nome: sorteio, obs: "Sorteio Aleatório" });
+            }
+            render();
+        }
+    }
+
+    function remover(i) {
+        carrinho.splice(i, 1);
+        render();
+    }
 
     function render() {
-        const menu = document.getElementById('lista-menu');
-        menu.innerHTML = "";
-        ["Proteína", "Acompanhamento", "Extra"].forEach(cat => {
-            const filtrados = bancoDados.filter(i => i.cat === cat);
-            if(filtrados.length > 0) {
-                menu.innerHTML += `<div class="categoria-title">${cat === 'Extra' ? 'Sucos e Sobremesas' : cat + 's'}</div>`;
-                filtrados.forEach(item => {
-                    const p = item.preco > 0 ? ` (+R$ ${item.preco.toFixed(2)})` : "";
-                    menu.innerHTML += `<div class="item-card"><span>${item.nome}${p}</span><button class="btn-add" onclick="adicionar('${item.nome}', '${item.cat}', ${item.preco})">+</button></div>`;
-                });
-            }
-        });
-    }
+        const divCar = document.getElementById('lista-carrinho');
+        const txtTotal = document.getElementById('total-txt');
+        let total = 0;
+        let qtd = carrinho.length;
 
-    function adicionar(nome, cat, preco) {
-        if(cat === 'Extra') extrasSelecionados.push({nome, preco});
-        else {
-            if(cat === 'Proteína' && montandoAgora.some(i => i.cat === 'Proteína')) return alert("Máximo 1 proteína por marmita!");
-            montandoAgora.push({nome, cat});
+        // Lógica de Combos Sabor & Cia
+        if (qtd === 7) total = 100;
+        else if (qtd === 15) total = 200;
+        else total = qtd * 15;
+
+        txtTotal.innerText = `R$ ${total.toFixed(2)}`;
+
+        if(qtd === 0) {
+            divCar.innerHTML = "Carrinho vazio...";
+        } else {
+            divCar.innerHTML = carrinho.map((item, i) => `
+                <div class="item-car">
+                    <span class="remove" onclick="remover(${i})">X</span>
+                    <b>${i+1}. ${item.nome}</b><br>
+                    <small>Obs: ${item.obs}</small>
+                </div>
+            `).join("");
         }
-        atualizarVisual();
-        calc();
-    }
-
-    function atualizarVisual() {
-        const visual = document.getElementById('visual-itens');
-        const msg = document.getElementById('builder-msg');
-        const btn = document.getElementById('btn-fechar');
-        visual.innerHTML = montandoAgora.map(i => `<div class="tag-item">${i.nome}</div>`).join("");
-        if(montandoAgora.length === 0) { msg.innerText = "Escolha a Proteína 👇"; btn.style.display = "none"; }
-        else if (!montandoAgora.some(i => i.cat === 'Proteína')) { msg.innerText = "Falta a Proteína!"; btn.style.display = "none"; }
-        else { msg.innerText = "Tudo certo! ✅"; btn.style.display = "block"; }
-    }
-
-    function concluirMarmita() { carrinhoMarmitas.push([...montandoAgora]); montandoAgora = []; atualizarVisual(); calc(); }
-
-    function calc() {
-        const qtd = carrinhoMarmitas.length;
-        let base = qtd * 22;
-        if(qtd >= 15) base = 290; else if(qtd >= 7) base = 150;
-        const total = base + extrasSelecionados.reduce((sum, i) => sum + i.preco, 0);
-        document.getElementById('count-marmitas').innerText = `${qtd} Marmitas`;
-        document.getElementById('valor-total').innerText = `R$ ${total.toFixed(2)}`;
-        document.getElementById('txt-promo').innerText = qtd >= 15 ? "Combo 15 Marmitas Ativado! ✅" : (qtd >= 7 ? "Combo 7 Marmitas Ativado! ✅" : "");
-    }
-
-    function abrirCheckout() { 
-        if(carrinhoMarmitas.length === 0 && extrasSelecionados.length === 0) return alert("Adicione itens ao carrinho primeiro!");
-        document.getElementById('modal-checkout').style.display = 'block'; 
-    }
-    function fecharCheckout() { document.getElementById('modal-checkout').style.display = 'none'; }
-
-    function setMetodo(m) {
-        metodo = m;
-        document.getElementById('btn-entrega').classList.toggle('active', m === 'Entrega');
-        document.getElementById('btn-retirada').classList.toggle('active', m === 'Retirada');
-        document.getElementById('form-endereco').style.display = (m === 'Entrega') ? 'block' : 'none';
     }
 
     function enviarZap() {
-        if(!metodo) return alert("Por favor, selecione Entrega ou Retirada!");
-        let entregaTxt = "";
-        if(metodo === 'Entrega') {
-            const n = document.getElementById('cli-nome').value;
-            const b = document.getElementById('cli-bairro').value;
-            const r = document.getElementById('cli-rua').value;
-            const num = document.getElementById('cli-num').value;
-            if(!n || !b || !r || !num) return alert("Preencha todos os campos do endereço!");
-            entregaTxt = `\n📍 *DADOS PARA ENTREGA*\n👤 Nome: ${n}\n🏠 Rua: ${r}, Nº ${num}\n🏘️ Bairro: ${b}`;
-        } else {
-            entregaTxt = `\n🏪 *RETIRADA NO BALCÃO*`;
-        }
-
-        let msg = `🔥 *NOVO PEDIDO - SABOR & CIA* 🔥\n`;
-        msg += `--------------------------------------\n`;
-        carrinhoMarmitas.forEach((m, i) => {
-            msg += `🍱 *Marmita ${i+1}:* ${m.map(item => item.nome).join(" + ")}\n`;
+        if(carrinho.length === 0) return alert("Adicione marmitas ao carrinho!");
+        
+        const metodo = document.getElementById('metodo-envio').value;
+        const total = document.getElementById('total-txt').innerText;
+        
+        let msg = `*NOVO PEDIDO - SABOR & CIA*%0A`;
+        msg += `*Metodo:* ${metodo}%0A`;
+        msg += `----------------------------%0A`;
+        msg += `*MARMITAS:*%0A`;
+        carrinho.forEach((item, idx) => {
+            msg += `${idx+1}. ${item.nome} (${item.obs})%0A`;
         });
-        
-        if(extrasSelecionados.length > 0) {
-            msg += `\n🥤 *EXTRAS:* ${extrasSelecionados.map(i => i.nome).join(", ")}\n`;
-        }
-        
-        msg += `--------------------------------------${entregaTxt}`;
-        msg += `\n\n💰 *TOTAL DO PEDIDO: ${document.getElementById('valor-total').innerText}*`;
-        msg += `\n--------------------------------------`;
-        
-        window.open(`https://api.whatsapp.com/send?phone=${TEL_ZAP}&text=${encodeURIComponent(msg)}`, '_blank');
-    }
+        msg += `----------------------------%0A`;
+        msg += `*TOTAL DO PEDIDO: ${total}*%0A%0A`;
+        msg += `_Pode confirmar o endereço caso seja entrega?_`;
 
-    function loginAdm() { if(prompt("Senha ADM:") === PASS_ADM) { document.getElementById('modal-adm').style.display = 'block'; renderAdm(); } }
-    function salvarItem() {
-        const nome = document.getElementById('adm-nome').value;
-        const preco = parseFloat(document.getElementById('adm-preco').value || 0);
-        const cat = document.getElementById('adm-cat').value;
-        if(nome) { bancoDados.push({nome, preco, cat}); localStorage.setItem('saborecia_db', JSON.stringify(bancoDados)); render(); renderAdm(); }
+        window.open(`https://wa.me/5547997909412?text=${msg}`);
     }
-    function renderAdm() {
-        const lista = document.getElementById('adm-itens-lista');
-        lista.innerHTML = bancoDados.map((item, idx) => `<div style="padding:10px; border-bottom:1px solid #333; display:flex; justify-content:space-between;"><span>${item.nome} (${item.cat})</span> <button onclick="remover(${idx})" style="color:red; background:none; border:none; font-weight:bold;">REMOVER</button></div>`).join("");
-    }
-    function remover(idx) { bancoDados.splice(idx, 1); localStorage.setItem('saborecia_db', JSON.stringify(bancoDados)); render(); renderAdm(); }
-    render();
 </script>
+
 </body>
-    </html>            
+</html>            
+
+    
