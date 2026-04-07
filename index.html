@@ -1,213 +1,232 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sabor & Cia - Cardápio Digital</title>
+    <title>Sabor & Cia - Cardápio Profissional</title>
     <style>
         :root { --primary: #ff6600; --dark: #2c3e50; --bg: #f8f9fa; --success: #27ae60; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); padding-bottom: 120px; color: var(--dark); }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); padding-bottom: 130px; color: var(--dark); }
         header { background: var(--dark); color: white; text-align: center; padding: 20px; border-bottom: 5px solid var(--primary); position: relative; }
-        .btn-adm-trigger { position: absolute; top: 10px; right: 10px; background: none; border: none; color: #555; font-size: 1.2rem; cursor: pointer; }
+        .btn-adm { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.3rem; cursor: pointer; }
         
         .container { padding: 15px; max-width: 500px; margin: auto; }
         .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid #ddd; }
-        h3 { margin-top: 0; color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        label { display: block; margin: 10px 0 5px; font-weight: bold; font-size: 0.85rem; }
-        select, input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        h3 { margin-top: 0; color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px; }
         
-        .btn-add { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; font-size: 1rem; }
-        .btn-extra { background: #eee; color: #333; border: 1px solid #ccc; padding: 10px; border-radius: 8px; width: 100%; margin-bottom: 10px; font-weight: bold; }
+        .menu-item { background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #ddd; font-size: 0.9rem; }
+        .badge-preco { float: right; background: #e8f5e9; color: #2e7d32; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        
+        label { display: block; margin: 12px 0 5px; font-weight: bold; font-size: 0.85rem; color: #555; }
+        select, input, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        
+        .btn-add { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
+        .btn-extra { background: white; color: var(--primary); border: 2px solid var(--primary); padding: 10px; border-radius: 8px; width: 100%; margin-bottom: 8px; font-weight: bold; cursor: pointer; text-align: left; }
         
         .footer { position: fixed; bottom: 0; width: 100%; background: white; padding: 15px; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 100; }
         .btn-zap { background: var(--success); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; width: 55%; font-size: 1rem; }
+        .btn-zap:disabled { background: #ccc; }
         
         .item-car { background: #fff; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 5px solid var(--primary); position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .remove { color: #e74c3c; font-weight: bold; position: absolute; right: 10px; top: 10px; cursor: pointer; padding: 5px; }
-        
-        /* Modal ADM */
-        #modal-adm { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center; }
-        .adm-content { background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto; }
+        .remove { color: #e74c3c; font-weight: bold; position: absolute; right: 10px; top: 10px; cursor: pointer; }
+
+        #modal-adm { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 200; align-items: center; justify-content: center; }
+        .adm-content { background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto; }
     </style>
 </head>
 <body>
 
 <header>
-    <button class="btn-adm-trigger" onclick="abrirAdm()">⚙️</button>
+    <button class="btn-adm" onclick="abrirAdm()">⚙️</button>
     <h1 style="margin:0">SABOR & CIA</h1>
-    <small>Marmitas 500ml • Monte seu Prato</small>
+    <small>Marmitas Congeladas • Pedido Mín. 5 un.</small>
 </header>
 
 <div class="container">
     <div class="card">
-        <h3>📍 Entrega ou Retirada?</h3>
-        <select id="metodo-envio">
-            <option value="Entrega">Entrega em Domicílio</option>
-            <option value="Retirada">Retirada no Balcão</option>
-        </select>
+        <h3>📖 Cardápio do Dia</h3>
+        <b>🥩 Proteínas:</b>
+        <div id="disp-proteinas" class="menu-item">Carregando...</div>
+        <b>🍚 Acompanhamentos:</b>
+        <div id="disp-acompanha" class="menu-item">Carregando...</div>
     </div>
 
     <div class="card">
-        <h3>🍱 Montar Marmita</h3>
-        <label>Proteína Principal:</label>
-        <select id="m-proteina">
-            <option value="Frango Grelhado">Frango Grelhado</option>
-            <option value="Carne Moída">Carne Moída</option>
-            <option value="Linguiça Toscana">Linguiça Toscana</option>
-        </select>
-        <label>Acompanhamentos (Arroz, Feijão, Macarrão...):</label>
-        <textarea id="m-acompanha" placeholder="O que deseja na sua marmita?"></textarea>
-        <label>Alguma restrição ou extra? (Ex: Sem cebola)</label>
-        <input type="text" id="m-obs" placeholder="Opcional">
+        <h3>🍱 Montar Marmita (R$ <span id="label-preco-un">15</span>)</h3>
+        <label>Escolha a Proteína:</label>
+        <select id="m-proteina"></select>
+        
+        <label>Seus Acompanhamentos:</label>
+        <textarea id="m-acompanha" placeholder="Ex: Arroz, Feijão, Macarrão e Legumes"></textarea>
+        
         <button class="btn-add" onclick="addMarmita()">+ ADICIONAR MARMITA</button>
     </div>
 
     <div class="card">
-        <h3>🥤 Bebidas e Doces</h3>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn-extra" onclick="addExtra('Suco Natural', config.precoSuco)">+ Suco (R$ <span id="label-suco">0</span>)</button>
-            <button class="btn-extra" onclick="addExtra('Mousse', config.precoMousse)">+ Mousse (R$ <span id="label-mousse">0</span>)</button>
-        </div>
+        <h3>🥤 Bebidas e Sobremesas</h3>
+        <div id="lista-extras"></div>
     </div>
 
-    <h3 style="margin-top:20px;">🛒 Seu Pedido:</h3>
-    <div id="lista-carrinho" style="color: #999;">Seu carrinho está vazio...</div>
+    <h3 style="margin-top:20px;">🛒 Seu Pedido (<span id="qtd-marmitas">0</span>/5 mín.):</h3>
+    <div id="lista-carrinho" style="color: #999;">Carrinho vazio...</div>
 </div>
 
 <div class="footer">
     <div style="width: 40%;">
-        <small style="font-weight:bold; color:#666;">TOTAL</small><br>
-        <b id="total-txt" style="font-size: 1.5rem; color: var(--dark);">R$ 0,00</b>
+        <small>TOTAL</small><br>
+        <b id="total-txt" style="font-size: 1.5rem;">R$ 0,00</b>
     </div>
-    <button class="btn-zap" onclick="enviarZap()">PEDIR NO WHATSAPP</button>
+    <button class="btn-zap" id="btn-finalizar" onclick="enviarZap()" disabled>PEDIR NO WHATSAPP</button>
 </div>
 
 <div id="modal-adm">
     <div class="adm-content">
-        <h3>⚙️ Painel do Patrão</h3>
-        <label>Preço Marmita Unitária:</label>
-        <input type="number" id="adm-un" step="0.50">
-        <label>Combo 7 Marmitas (Valor Total):</label>
-        <input type="number" id="adm-c7" step="1">
-        <label>Combo 15 Marmitas (Valor Total):</label>
-        <input type="number" id="adm-c15" step="1">
-        <label>Preço Suco:</label>
-        <input type="number" id="adm-suco" step="0.50">
-        <label>Preço Mousse:</label>
-        <input type="number" id="adm-mousse" step="0.50">
+        <h3>⚙️ Gestão Sabor & Cia</h3>
+        
+        <label>Proteínas (uma por linha):</label>
+        <textarea id="adm-prot" rows="3"></textarea>
+        
+        <label>Acompanhamentos:</label>
+        <textarea id="adm-acomp" rows="3"></textarea>
+        
+        <label>Bebida (Nome, Preço):</label>
+        <input type="text" id="adm-bebida-nome" placeholder="Ex: Suco de Laranja, 7.00">
+        
+        <label>Sobremesa (Nome, Preço):</label>
+        <input type="text" id="adm-doce-nome" placeholder="Ex: Mousse de Maracujá, 5.00">
+        
         <hr>
+        <label>Preço Marmita Unitária (R$):</label>
+        <input type="number" id="adm-un" step="0.50">
+        <label>Combo 7 (R$):</label>
+        <input type="number" id="adm-c7" step="1">
+        <label>Combo 15 (R$):</label>
+        <input type="number" id="adm-c15" step="1">
+        
         <button class="btn-add" onclick="salvarConfig()">SALVAR ALTERAÇÕES</button>
-        <button class="btn-extra" onclick="fecharAdm()" style="margin-top:10px;">CANCELAR</button>
+        <button class="btn-extra" onclick="fecharAdm()" style="margin-top:10px; text-align:center;">FECHAR</button>
     </div>
 </div>
 
 <script>
-    // Configurações Padrão (Ficam salvas no celular do José)
-    let config = JSON.parse(localStorage.getItem('sc_config')) || {
+    let config = JSON.parse(localStorage.getItem('sc_config_v2')) || {
+        proteinas: "Frango Grelhado\nCarne Moída\nLinguiça Toscana",
+        acompanhamentos: "Arroz Branco, Feijão Preto, Macarrão Alho e Óleo, Legumes Salteados.",
+        bebida: { nome: "Suco Natural", preco: 7.00 },
+        sobremesa: { nome: "Mousse Caseiro", preco: 5.00 },
         precoUn: 15.00,
         combo7: 100.00,
-        combo15: 200.00,
-        precoSuco: 7.00,
-        precoMousse: 5.00
+        combo15: 200.00
     };
 
     let carrinho = [];
 
-    function atualizarLabels() {
-        document.getElementById('label-suco').innerText = config.precoSuco.toFixed(2);
-        document.getElementById('label-mousse').innerText = config.precoMousse.toFixed(2);
-        render();
-    }
-
     function abrirAdm() {
-        const senha = prompt("Digite a senha de administrador:");
-        if (senha === "19019523") {
+        if (prompt("Senha ADM:") === "19019523") {
+            document.getElementById('adm-prot').value = config.proteinas;
+            document.getElementById('adm-acomp').value = config.acompanhamentos;
+            document.getElementById('adm-bebida-nome').value = `${config.bebida.nome}, ${config.bebida.preco}`;
+            document.getElementById('adm-doce-nome').value = `${config.sobremesa.nome}, ${config.sobremesa.preco}`;
             document.getElementById('adm-un').value = config.precoUn;
             document.getElementById('adm-c7').value = config.combo7;
             document.getElementById('adm-c15').value = config.combo15;
-            document.getElementById('adm-suco').value = config.precoSuco;
-            document.getElementById('adm-mousse').value = config.precoMousse;
             document.getElementById('modal-adm').style.display = 'flex';
-        } else {
-            alert("Senha incorreta!");
-        }
+        } else { alert("Senha incorreta!"); }
+    }
+
+    function salvarConfig() {
+        config.proteinas = document.getElementById('adm-prot').value;
+        config.acompanhamentos = document.getElementById('adm-acomp').value;
+        
+        const b = document.getElementById('adm-bebida-nome').value.split(',');
+        config.bebida = { nome: b[0].trim(), preco: parseFloat(b[1]) || 0 };
+        
+        const s = document.getElementById('adm-doce-nome').value.split(',');
+        config.sobremesa = { nome: s[0].trim(), preco: parseFloat(s[1]) || 0 };
+        
+        config.precoUn = parseFloat(document.getElementById('adm-un').value);
+        config.combo7 = parseFloat(document.getElementById('adm-c7').value);
+        config.combo15 = parseFloat(document.getElementById('adm-c15').value);
+        
+        localStorage.setItem('sc_config_v2', JSON.stringify(config));
+        fecharAdm();
+        render();
     }
 
     function fecharAdm() { document.getElementById('modal-adm').style.display = 'none'; }
 
-    function salvarConfig() {
-        config.precoUn = parseFloat(document.getElementById('adm-un').value);
-        config.combo7 = parseFloat(document.getElementById('adm-c7').value);
-        config.combo15 = parseFloat(document.getElementById('adm-c15').value);
-        config.precoSuco = parseFloat(document.getElementById('adm-suco').value);
-        config.precoMousse = parseFloat(document.getElementById('adm-mousse').value);
-        
-        localStorage.setItem('sc_config', JSON.stringify(config));
-        fecharAdm();
-        atualizarLabels();
-        alert("Preços atualizados com sucesso!");
-    }
-
     function addMarmita() {
         const prot = document.getElementById('m-proteina').value;
         const acomp = document.getElementById('m-acompanha').value || "Completa";
-        const obs = document.getElementById('m-obs').value || "Sem restrições";
-        carrinho.push({ tipo: 'marmita', nome: `Marmita: ${prot}`, det: `Acomp: ${acomp} | Obs: ${obs}` });
+        carrinho.push({ tipo: 'marmita', nome: `Marmita: ${prot}`, det: acomp, preco: config.precoUn });
         document.getElementById('m-acompanha').value = "";
-        document.getElementById('m-obs').value = "";
         render();
     }
 
-    function addExtra(nome, preco) {
-        carrinho.push({ tipo: 'extra', nome: nome, preco: preco, det: '' });
+    function addExtra(n, p) {
+        carrinho.push({ tipo: 'extra', nome: n, preco: p, det: '' });
         render();
     }
 
     function remover(i) { carrinho.splice(i, 1); render(); }
 
     function render() {
-        const divCar = document.getElementById('lista-carrinho');
-        let subMarmitas = 0;
-        let subExtras = 0;
-        let qtdMarmitas = 0;
+        // Atualiza display do cardápio
+        document.getElementById('disp-proteinas').innerText = config.proteinas;
+        document.getElementById('disp-acompanha').innerText = config.acompanhamentos;
+        document.getElementById('label-preco-un').innerText = config.precoUn.toFixed(2);
+        
+        // Atualiza select de proteínas
+        const selProt = document.getElementById('m-proteina');
+        selProt.innerHTML = config.proteinas.split('\n').map(p => `<option value="${p}">${p}</option>`).join('');
 
-        carrinho.forEach(item => {
-            if(item.tipo === 'marmita') qtdMarmitas++;
-            else subExtras += item.preco;
+        // Botões de extras
+        document.getElementById('lista-extras').innerHTML = `
+            <button class="btn-extra" onclick="addExtra('${config.bebida.nome}', ${config.bebida.preco})">
+                + ${config.bebida.nome} <span class="badge-preco">R$ ${config.bebida.preco.toFixed(2)}</span>
+            </button>
+            <button class="btn-extra" onclick="addExtra('${config.sobremesa.nome}', ${config.sobremesa.preco})">
+                + ${config.sobremesa.nome} <span class="badge-preco">R$ ${config.sobremesa.preco.toFixed(2)}</span>
+            </button>
+        `;
+
+        const divCar = document.getElementById('lista-carrinho');
+        let subM = 0, subE = 0, qtdM = 0;
+
+        carrinho.forEach(it => {
+            if(it.tipo === 'marmita') qtdM++;
+            else subE += it.preco;
         });
 
-        // Lógica de Combos ADM
-        if (qtdMarmitas === 7) subMarmitas = config.combo7;
-        else if (qtdMarmitas === 15) subMarmitas = config.combo15;
-        else subMarmitas = qtdMarmitas * config.precoUn;
+        if (qtdM === 7) subM = config.combo7;
+        else if (qtdM === 15) subM = config.combo15;
+        else subM = qtdM * config.precoUn;
 
-        const total = subMarmitas + subExtras;
-        document.getElementById('total-txt').innerText = `R$ ${total.toFixed(2)}`;
+        document.getElementById('total-txt').innerText = `R$ ${(subM + subE).toFixed(2)}`;
+        document.getElementById('qtd-marmitas').innerText = qtdM;
+        document.getElementById('btn-finalizar').disabled = (qtdM < 5);
 
-        if(carrinho.length === 0) {
-            divCar.innerHTML = "Seu carrinho está vazio...";
-        } else {
-            divCar.innerHTML = carrinho.map((item, i) => `
+        if(carrinho.length === 0) divCar.innerHTML = "Carrinho vazio...";
+        else {
+            divCar.innerHTML = carrinho.map((it, i) => `
                 <div class="item-car">
                     <span class="remove" onclick="remover(${i})">✕</span>
-                    <b>${item.nome}</b><br>
-                    <small>${item.det}</small>
+                    <b>${it.nome}</b><br><small>${it.det}</small>
                 </div>
             `).join("");
         }
     }
 
     function enviarZap() {
-        if(carrinho.length === 0) return alert("Adicione algo ao carrinho!");
-        const metodo = document.getElementById('metodo-envio').value;
-        const total = document.getElementById('total-txt').innerText;
-        let msg = `*NOVO PEDIDO - SABOR & CIA*%0A*Metodo:* ${metodo}%0A----------------------------%0A`;
+        let msg = `*PEDIDO SABOR & CIA*%0A----------------------------%0A`;
         carrinho.forEach((it, idx) => { msg += `*${idx+1}. ${it.nome}*%0A${it.det ? '└ ' + it.det + '%0A' : ''}`; });
-        msg += `----------------------------%0A*TOTAL: ${total}*%0A%0A_Pode confirmar o endereço?_`;
+        msg += `----------------------------%0A*TOTAL: ${document.getElementById('total-txt').innerText}*`;
         window.open(`https://wa.me/5547997909412?text=${msg}`);
     }
 
-    atualizarLabels();
+    render();
 </script>
 </body>
-</html>   
+</html>     
+
+            
