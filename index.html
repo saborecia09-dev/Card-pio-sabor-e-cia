@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sabor & Cia - Cardápio</title>
+    <title>Sabor & Cia - Oficial</title>
     <style>
         :root { --primary: #ff6600; --dark: #2c3e50; --bg: #f8f9fa; --success: #27ae60; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); padding-bottom: 130px; color: var(--dark); }
@@ -12,10 +12,12 @@
         .container { padding: 15px; max-width: 500px; margin: auto; }
         .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid #ddd; }
         h3 { margin-top: 0; color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px; }
-        .menu-item { background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #ddd; font-size: 0.9rem; }
-        label { display: block; margin: 12px 0 5px; font-weight: bold; font-size: 0.85rem; color: #555; }
-        select, input, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
         
+        /* Estilo para os itens de seleção */
+        .opcoes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .opt-btn { background: #fff; border: 1px solid #ddd; padding: 10px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; text-align: center; transition: 0.2s; }
+        .opt-btn.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: bold; }
+
         .qtd-container { display: flex; align-items: center; justify-content: center; gap: 20px; margin: 15px 0; background: #eee; padding: 10px; border-radius: 10px; }
         .btn-qtd { background: var(--dark); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; font-weight: bold; cursor: pointer; }
         #display-qtd { font-size: 1.5rem; font-weight: bold; min-width: 30px; text-align: center; }
@@ -29,6 +31,8 @@
 
         #modal-adm { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 200; align-items: center; justify-content: center; }
         .adm-content { background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto; }
+        label { display: block; margin: 12px 0 5px; font-weight: bold; font-size: 0.85rem; }
+        textarea, input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -41,18 +45,13 @@
 
 <div class="container">
     <div class="card">
-        <h3>📖 Cardápio do Dia</h3>
-        <b>🥩 Proteínas:</b> <div id="disp-proteinas" class="menu-item"></div>
-        <b>🍚 Acompanhamentos:</b> <div id="disp-acompanha" class="menu-item"></div>
-    </div>
-
-    <div class="card">
         <h3>🍱 Montar Marmita (R$ <span id="label-preco-un">15</span>)</h3>
-        <label>Escolha a Proteína:</label>
-        <select id="m-proteina"></select>
         
-        <label>Seus Acompanhamentos:</label>
-        <textarea id="m-acompanha" placeholder="Arroz, Feijão, Macarrão..."></textarea>
+        <label>1. Escolha a Proteína:</label>
+        <div id="grid-proteinas" class="opcoes-grid"></div>
+        
+        <label>2. Acompanhamentos (Selecione):</label>
+        <div id="grid-acompanhamentos" class="opcoes-grid"></div>
         
         <label style="text-align:center;">Quantidade desta mesma marmita:</label>
         <div class="qtd-container">
@@ -86,7 +85,7 @@
         <h3>⚙️ Gestão Sabor & Cia</h3>
         <label>Proteínas (uma por linha):</label>
         <textarea id="adm-prot" rows="3"></textarea>
-        <label>Acompanhamentos:</label>
+        <label>Acompanhamentos (um por linha):</label>
         <textarea id="adm-acomp" rows="3"></textarea>
         <label>Bebida (Nome, Preço):</label>
         <input type="text" id="adm-bebida-nome">
@@ -105,16 +104,18 @@
 </div>
 
 <script>
-    let config = JSON.parse(localStorage.getItem('sc_config_v3')) || {
+    let config = JSON.parse(localStorage.getItem('sc_config_v4')) || {
         proteinas: "Frango Grelhado\nCarne Moída\nLinguiça Toscana",
-        acompanhamentos: "Arroz, Feijão, Macarrão e Legumes.",
-        bebida: { nome: "Suco Natural", preco: 7.00 },
-        sobremesa: { nome: "Mousse", preco: 5.00 },
+        acompanhamentos: "Arroz Branco\nFeijão Preto\nMacarrão\nLegumes",
+        bebida: { nome: "Coca-Cola 350ml", preco: 5.00 },
+        sobremesa: { nome: "Pudim", preco: 6.00 },
         precoUn: 15.00, combo7: 100.00, combo15: 200.00
     };
 
     let carrinho = [];
     let qtdAtual = 1;
+    let protSel = "";
+    let acompSel = [];
 
     function abrirAdm() {
         if (prompt("Senha ADM:") === "19019523") {
@@ -139,41 +140,49 @@
         config.precoUn = parseFloat(document.getElementById('adm-un').value);
         config.combo7 = parseFloat(document.getElementById('adm-c7').value);
         config.combo15 = parseFloat(document.getElementById('adm-c15').value);
-        localStorage.setItem('sc_config_v3', JSON.stringify(config));
+        localStorage.setItem('sc_config_v4', JSON.stringify(config));
         fecharAdm(); render();
     }
 
     function fecharAdm() { document.getElementById('modal-adm').style.display = 'none'; }
+    function alterarQtd(v) { qtdAtual = Math.max(1, qtdAtual + v); document.getElementById('display-qtd').innerText = qtdAtual; }
 
-    function alterarQtd(valor) {
-        qtdAtual += valor;
-        if (qtdAtual < 1) qtdAtual = 1;
-        document.getElementById('display-qtd').innerText = qtdAtual;
+    function selecionarProt(nome) { protSel = nome; render(); }
+    
+    function selecionarAcomp(nome) {
+        if(acompSel.includes(nome)) acompSel = acompSel.filter(a => a !== nome);
+        else acompSel.push(nome);
+        render();
     }
 
     function addMarmita() {
-        const prot = document.getElementById('m-proteina').value;
-        const acomp = document.getElementById('m-acompanha').value || "Completa";
+        if(!protSel) return alert("Selecione uma proteína!");
+        if(acompSel.length === 0) return alert("Selecione pelo menos um acompanhamento!");
+        
         for (let i = 0; i < qtdAtual; i++) {
-            carrinho.push({ tipo: 'marmita', nome: `Marmita: ${prot}`, det: acomp, preco: config.precoUn });
+            carrinho.push({ tipo: 'marmita', nome: `Marmita: ${protSel}`, det: acompSel.join(", "), preco: config.precoUn });
         }
-        qtdAtual = 1;
-        document.getElementById('display-qtd').innerText = qtdAtual;
-        document.getElementById('m-acompanha').value = "";
+        qtdAtual = 1; protSel = ""; acompSel = [];
+        document.getElementById('display-qtd').innerText = 1;
         render();
     }
 
-    function addExtra(n, p) {
-        carrinho.push({ tipo: 'extra', nome: n, preco: p });
-        render();
-    }
-
+    function addExtra(n, p) { carrinho.push({ tipo: 'extra', nome: n, preco: p }); render(); }
     function remover(i) { carrinho.splice(i, 1); render(); }
 
     function render() {
-        document.getElementById('disp-proteinas').innerText = config.proteinas;
-        document.getElementById('disp-acompanha').innerText = config.acompanhamentos;
-        document.getElementById('m-proteina').innerHTML = config.proteinas.split('\n').map(p => `<option value="${p}">${p}</option>`).join('');
+        // Renderizar Proteínas
+        const divP = document.getElementById('grid-proteinas');
+        divP.innerHTML = config.proteinas.split('\n').map(p => p.trim()).filter(p => p).map(p => `
+            <div class="opt-btn ${protSel === p ? 'active' : ''}" onclick="selecionarProt('${p}')">${p}</div>
+        `).join('');
+
+        // Renderizar Acompanhamentos
+        const divA = document.getElementById('grid-acompanhamentos');
+        divA.innerHTML = config.acompanhamentos.split('\n').map(a => a.trim()).filter(a => a).map(a => `
+            <div class="opt-btn ${acompSel.includes(a) ? 'active' : ''}" onclick="selecionarAcomp('${a}')">${a}</div>
+        `).join('');
+
         document.getElementById('label-preco-un').innerText = config.precoUn;
         document.getElementById('lista-extras').innerHTML = `
             <button class="btn-add" style="background:#eee; color:#333; margin-bottom:5px;" onclick="addExtra('${config.bebida.nome}', ${config.bebida.preco})">+ ${config.bebida.nome} (R$ ${config.bebida.preco.toFixed(2)})</button>
@@ -182,7 +191,6 @@
 
         let subM = 0, subE = 0, qtdM = 0;
         carrinho.forEach(it => { if(it.tipo === 'marmita') qtdM++; else subE += it.preco; });
-
         if (qtdM === 7) subM = config.combo7;
         else if (qtdM === 15) subM = config.combo15;
         else subM = qtdM * config.precoUn;
@@ -204,30 +212,15 @@
 
     function enviarZap() {
         const total = document.getElementById('total-txt').innerText;
-        let qtdM = 0;
-        carrinho.forEach(it => { if(it.tipo === 'marmita') qtdM++; });
-        
-        let msg = `*🍱 PEDIDO SABOR & CIA*\n`;
-        msg += `------------------------------\n`;
+        let msg = `*🍱 PEDIDO SABOR & CIA*\n------------------------------\n`;
         carrinho.forEach((it, idx) => {
-            if (it.tipo === 'marmita') {
-                msg += `*${idx + 1}. ${it.nome}*\n`;
-                msg += `   └ Obs: ${it.det || 'Completa'}\n\n`;
-            } else {
-                msg += `*${idx + 1}. ${it.nome}* (R$ ${it.preco.toFixed(2)})\n\n`;
-            }
+            msg += `*${idx + 1}. ${it.nome}*\n${it.det ? '   └ ' + it.det + '\n' : ''}\n`;
         });
-        msg += `------------------------------\n`;
-        if(qtdM > 0) msg += `👉 *Marmitas:* ${qtdM}\n`;
-        msg += `💰 *TOTAL: ${total}*\n`;
-        msg += `------------------------------\n\n`;
-        msg += `_Informe endereço e forma de pagamento._`;
-
+        msg += `------------------------------\n💰 *TOTAL: ${total}*\n------------------------------\n_Informe o endereço e a forma de pagamento._`;
         window.location.href = "https://wa.me/5547997909412?text=" + encodeURIComponent(msg);
     }
 
     render();
 </script>
 </body>
-</html>
-                
+</html>            
