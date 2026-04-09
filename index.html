@@ -37,7 +37,7 @@
 <header>
     <button class="btn-adm" onclick="abrirAdm()">⚙️</button>
     <h1 style="margin:0">SABOR & CIA</h1>
-    <small>Marmitas Congeladas • Pedido Mín. 5 un.</small>
+    <small>Marmitas Congeladas • Presidente Getúlio</small>
 </header>
 
 <div class="container">
@@ -70,7 +70,7 @@
         <div id="lista-extras"></div>
     </div>
 
-    <h3 style="margin-top:20px;">🛒 Seu Pedido (<span id="qtd-marmitas">0</span>/5 mín.):</h3>
+    <h3 style="margin-top:20px;">🛒 Seu Pedido:</h3>
     <div id="lista-carrinho" style="color: #999;">Carrinho vazio...</div>
 </div>
 
@@ -190,8 +190,9 @@
         else subM = qtdM * config.precoUn;
 
         document.getElementById('total-txt').innerText = `R$ ${(subM + subE).toFixed(2)}`;
-        document.getElementById('qtd-marmitas').innerText = qtdM;
-        document.getElementById('btn-finalizar').disabled = (qtdM < 5);
+        
+        // Botão habilita com qualquer item no carrinho
+        document.getElementById('btn-finalizar').disabled = (carrinho.length === 0);
 
         const divCar = document.getElementById('lista-carrinho');
         if(carrinho.length === 0) divCar.innerHTML = "Carrinho vazio...";
@@ -207,7 +208,8 @@
 
     function enviarZap() {
         const total = document.getElementById('total-txt').innerText;
-        const qtdM = document.getElementById('qtd-marmitas').innerText;
+        let qtdM = 0;
+        carrinho.forEach(it => { if(it.tipo === 'marmita') qtdM++; });
         
         let msg = `*🍱 PEDIDO SABOR & CIA*\n`;
         msg += `------------------------------\n`;
@@ -222,7 +224,7 @@
         });
 
         msg += `------------------------------\n`;
-        msg += `👉 *Total de Marmitas:* ${qtdM}\n`;
+        if(qtdM > 0) msg += `👉 *Total de Marmitas:* ${qtdM}\n`;
         msg += `💰 *VALOR TOTAL: ${total}*\n`;
         msg += `------------------------------\n\n`;
         msg += `_Informe o endereço e a forma de pagamento._`;
@@ -234,4 +236,4 @@
     render();
 </script>
 </body>
-</html>                    
+</html>                
