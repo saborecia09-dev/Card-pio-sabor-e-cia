@@ -3,170 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sabor & Cia - Cardápio Dinâmico</title>
+    <title>Sabor & Cia - Monte seu Pedido</title>
     <style>
-        :root { --primary: #ff6600; --dark: #121212; --card-bg: #1e1e1e; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--dark); color: white; padding-bottom: 100px; }
+        :root { --primary: #ff6600; --dark: #121212; --card: #1e1e1e; --success: #25d366; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--dark); color: white; padding-bottom: 130px; }
         
         header { background: #000; border-bottom: 4px solid var(--primary); text-align: center; padding: 20px; }
-        header h1 { margin: 0; color: var(--primary); font-size: 1.8rem; }
-
         .container { padding: 15px; max-width: 500px; margin: auto; }
-        .section-title { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 5px; margin: 25px 0 10px; font-weight: bold; }
+        
+        .section-title { color: var(--primary); border-bottom: 2px solid var(--primary); padding: 10px 0 5px; margin-top: 20px; font-weight: bold; text-transform: uppercase; font-size: 0.9rem; }
 
-        /* Card do Cliente */
-        .card { background: var(--card-bg); padding: 15px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
-        .btn-add { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .item-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .btn-item { background: var(--card); border: 2px solid #333; color: white; padding: 12px; border-radius: 8px; cursor: pointer; text-align: center; font-size: 0.85rem; position: relative; }
+        .btn-item.selected { border-color: var(--primary); background: rgba(255, 102, 0, 0.1); font-weight: bold; }
+        .price-tag { display: block; font-size: 0.7rem; color: var(--primary); margin-top: 4px; }
 
-        /* Carrinho */
-        .footer-cart { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 3px solid var(--primary); padding: 15px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
-        .btn-whatsapp { background: #25d366; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .footer { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 3px solid var(--primary); padding: 15px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .total-box b { font-size: 1.5rem; color: var(--primary); display: block; }
+        .btn-whatsapp { background: var(--success); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-        /* Área ADM Oculta */
-        #area-adm { display: none; background: #222; padding: 20px; border-radius: 15px; margin-top: 20px; border: 2px dashed var(--primary); }
-        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
-        .btn-salvar { background: var(--primary); color: white; width: 100%; padding: 10px; border: none; font-weight: bold; border-radius: 5px; }
-        .btn-delete { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin-left: 10px; }
+        #panel-adm { display: none; background: #222; border: 2px solid var(--primary); padding: 15px; border-radius: 10px; margin-top: 20px; }
+        input, select { width: 100%; padding: 12px; margin: 5px 0 15px; border-radius: 5px; border: none; box-sizing: border-box; }
+        .adm-list-item { display: flex; justify-content: space-between; background: #333; padding: 8px; margin-bottom: 5px; border-radius: 5px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>SABOR & CIA</h1>
-    <p style="font-size: 0.8rem; color: #999;">PRESIDENTE GETÚLIO - SC</p>
+    <h1 style="margin:0; color:var(--primary);">SABOR & CIA</h1>
+    <small>MONTE SUA MARMITA & BEBIDAS</small>
 </header>
 
 <div class="container">
-    <div class="section-title">NOSSO CARDÁPIO (R$ 15,00)</div>
-    <div id="cardapio-cliente">
+    <div id="menu-cliente">
+        <div class="section-title">1. Escolha o Arroz / Base</div>
+        <div id="list-base" class="item-grid"></div>
+
+        <div class="section-title">2. Escolha o Feijão</div>
+        <div id="list-feijao" class="item-grid"></div>
+
+        <div class="section-title">3. Escolha a Massa</div>
+        <div id="list-massa" class="item-grid"></div>
+
+        <div class="section-title">4. Escolha a Carne</div>
+        <div id="list-carne" class="item-grid"></div>
+
+        <div class="section-title">5. Bebidas e Sobremesas</div>
+        <div id="list-extra" class="item-grid"></div>
+    </div>
+
+    <button onclick="abrirAdm()" style="margin-top:50px; background:none; border:none; color:#222; width:100%;">[ CONFIGURAÇÕES ]</button>
+
+    <div id="panel-adm">
+        <h3 style="color:var(--primary);">Painel de Controle</h3>
+        <input type="text" id="adm-nome" placeholder="Nome do item (ex: Coca-Cola 2L)">
+        <select id="adm-cat" onchange="checkPriceField()">
+            <option value="base">Arroz / Base</option>
+            <option value="feijao">Feijão</option>
+            <option value="massa">Massa</option>
+            <option value="carne">Carne</option>
+            <option value="extra">Bebida ou Sobremesa (Com Preço)</option>
+        </select>
+        <div id="price-field" style="display:none;">
+            <label>Preço do Item (R$):</label>
+            <input type="number" id="adm-preco" placeholder="0.00" step="0.01">
         </div>
-
-    <div class="section-title">MEU PEDIDO</div>
-    <div id="lista-resumo" style="font-size: 0.9rem; color: #bbb;">Nenhum item...</div>
-
-    <button onclick="acessarADM()" style="margin-top: 50px; background: none; border: none; color: #333; font-size: 0.7rem; width: 100%;">[ ACESSO ADM ]</button>
-
-    <div id="area-adm">
-        <h3 style="color: var(--primary); margin-top: 0;">PAINEL DO DONO</h3>
-        <label>Nome do Prato:</label>
-        <input type="text" id="novo-prato-nome" placeholder="Ex: Feijoada Completa">
-        <label>Descrição:</label>
-        <input type="text" id="novo-prato-desc" placeholder="Ex: Arroz, couve e farofa">
-        <button class="btn-salvar" onclick="salvarPrato()">ADICIONAR AO CARDÁPIO</button>
+        <button onclick="adicionarItem()" style="width:100%; padding:15px; background:var(--primary); color:white; border:none; font-weight:bold; border-radius:8px;">CADASTRAR NO CARDÁPIO</button>
         
-        <div style="margin-top: 20px;">
-            <h4>Gerenciar Pratos:</h4>
-            <div id="gerenciar-itens"></div>
-        </div>
-        <button onclick="document.getElementById('area-adm').style.display='none'" style="background:gray; color:white; width:100%; margin-top:10px; border:none; padding:5px;">FECHAR ADM</button>
+        <h4 style="margin-top:20px;">Itens Ativos:</h4>
+        <div id="adm-lista-geral"></div>
+        <button onclick="fecharAdm()" style="width:100%; margin-top:10px; background:#444; color:white; border:none; padding:10px; border-radius:8px;">FECHAR PAINEL</button>
     </div>
 </div>
 
-<div class="footer-cart">
-    <div>
-        <small style="color: #999;">Total:</small><br>
-        <b id="total-txt" style="font-size: 1.4rem; color: var(--primary);">R$ 0,00</b>
+<div class="footer">
+    <div class="total-box">
+        <small id="resumo-qtd">Selecione os itens</small>
+        <b id="total-txt">R$ 0,00</b>
     </div>
-    <button class="btn-whatsapp" onclick="enviar()">PEDIR NO WHATSAPP</button>
+    <button class="btn-whatsapp" onclick="enviarPedido()">FECHAR PEDIDO</button>
 </div>
 
 <script>
-    // Banco de Dados Local para os Pratos
-    let pratos = JSON.parse(localStorage.getItem('sc_cardapio_v1')) || [
-        {n: "FRANGO GRELHADO", d: "Arroz, Feijão, Frango e Legumes"},
-        {n: "CARNE MOÍDA", d: "Arroz, Feijão e Carne Moída"}
-    ];
-    let carrinho = [];
+    let db = JSON.parse(localStorage.getItem('sc_db_v3')) || [];
+    let selecionados = [];
 
-    function acessarADM() {
-        let senha = prompt("Digite a senha administrativa:");
-        if(senha === "123") {
-            document.getElementById('area-adm').style.display = 'block';
-            renderADM();
-        } else {
-            alert("Senha incorreta!");
+    function abrirAdm() {
+        if(prompt("Senha Administrativa:") === "123") {
+            document.getElementById('panel-adm').style.display = 'block';
+            renderAdm();
         }
     }
 
-    function salvarPrato() {
-        const nome = document.getElementById('novo-prato-nome').value.toUpperCase();
-        const desc = document.getElementById('novo-prato-desc').value;
-        if(nome) {
-            pratos.push({n: nome, d: desc});
-            localStorage.setItem('sc_cardapio_v1', JSON.stringify(pratos));
-            document.getElementById('novo-prato-nome').value = "";
-            document.getElementById('novo-prato-desc').value = "";
-            render();
-            renderADM();
-        }
+    function fecharAdm() { document.getElementById('panel-adm').style.display = 'none'; }
+
+    function checkPriceField() {
+        const cat = document.getElementById('adm-cat').value;
+        document.getElementById('price-field').style.display = (cat === 'extra') ? 'block' : 'none';
     }
 
-    function removerPrato(i) {
-        if(confirm("Remover este prato do cardápio?")) {
-            pratos.splice(i, 1);
-            localStorage.setItem('sc_cardapio_v1', JSON.stringify(pratos));
-            render();
-            renderADM();
-        }
-    }
-
-    function render() {
-        const pCliente = document.getElementById('cardapio-cliente');
-        pCliente.innerHTML = pratos.map((p, i) => `
-            <div class="card">
-                <div>
-                    <b>${p.n}</b>
-                    <span style="font-size: 0.8rem; color: #999;">${p.d}</span>
-                </div>
-                <button class="btn-add" onclick="addCar('${p.n}')">+</button>
-            </div>
-        `).join("");
-    }
-
-    function renderADM() {
-        const gItens = document.getElementById('gerenciar-itens');
-        gItens.innerHTML = pratos.map((p, i) => `
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px; background:#333; padding:5px; border-radius:5px;">
-                <span>${p.n}</span>
-                <button class="btn-delete" onclick="removerPrato(${i})">Remover</button>
-            </div>
-        `).join("");
-    }
-
-    function addCar(n) {
-        carrinho.push(n);
-        atualizarResumo();
-    }
-
-    function atualizarResumo() {
-        const res = document.getElementById('lista-resumo');
-        const tot = document.getElementById('total-txt');
+    function adicionarItem() {
+        const nome = document.getElementById('adm-nome').value.toUpperCase();
+        const cat = document.getElementById('adm-cat').value;
+        const preco = parseFloat(document.getElementById('adm-preco').value) || 0;
         
-        if(carrinho.length === 0) {
-            res.innerHTML = "Nenhum item...";
-            tot.innerText = "R$ 0,00";
-            return;
+        if(nome) {
+            db.push({id: Date.now(), cat, nome, preco});
+            localStorage.setItem('sc_db_v3', JSON.stringify(db));
+            document.getElementById('adm-nome').value = "";
+            document.getElementById('adm-preco').value = "";
+            renderMenu();
+            renderAdm();
         }
-
-        let valor = carrinho.length * 15;
-        if(carrinho.length === 7) valor = 100;
-        if(carrinho.length === 15) valor = 200;
-
-        res.innerHTML = carrinho.map((item, i) => `<div>${i+1}. ${item}</div>`).join("");
-        tot.innerText = `R$ ${valor.toFixed(2)}`;
     }
 
-    function enviar() {
-        if(carrinho.length === 0) return alert("Selecione um prato!");
-        const texto = `*NOVO PEDIDO - SABOR & CIA*%0A${carrinho.join('%0A')}%0A%0A*TOTAL: ${document.getElementById('total-txt').innerText}*`;
-        window.open(`https://wa.me/5547997909412?text=${texto}`);
+    function removerItem(id) {
+        db = db.filter(item => item.id !== id);
+        localStorage.setItem('sc_db_v3', JSON.stringify(db));
+        renderMenu();
+        renderAdm();
     }
 
-    // Inicializa o cardápio ao abrir
-    render();
+    function renderMenu() {
+        const categorias = ['base', 'feijao', 'massa', 'carne', 'extra'];
+        categorias.forEach(cat => {
+            const div = document.getElementById(`list-${cat}`);
+            const itensCat = db.filter(i => i.cat === cat);
+            div.innerHTML = itensCat.map(i => {
+                const isSelected = selecionados.some(s => s.id === i.id);
+                const precoExibido = i.preco > 0 ? `<span class="price-tag">+ R$ ${i.preco.toFixed(2)}</span>` : '';
+                return `
+                    <div class="btn-item ${isSelected ? 'selected' : ''}" onclick="toggleItem(${i.id})">
+                        ${i.nome}
+                        ${precoExibido}
+                    </div>
+                `;
+            }).join("");
+        });
+        atualizarTotal();
+    }
+
+    function renderAdm() {
+        const div = document.getElementById('adm-lista-geral');
+        div.innerHTML = db.map(i => `
+            <div class="adm-list-item">
+                <span>[${i.cat.toUpperCase()}] ${i.nome} ${i.preco > 0 ? '- R$ '+i.preco.toFixed(2) : ''}</span>
+                <span style="color:#ff4444; font-weight:bold; cursor:pointer;" onclick="removerItem(${i.id})">EXCLUIR</span>
+            </div>
+        `).join("");
+    }
+
+    function toggleItem(id) {
+        const item = db.find(i => i.id === id);
+        const index = selecionados.findIndex(s => s.id === id);
+        
+        if(index > -1) {
+            selecionados.splice(index, 1);
+        } else {
+            selecionados.push(item);
+        }
+        renderMenu();
+    }
+
+    function atualizarTotal() {
+        let temComida = selecionados.some(s => ['base', 'feijao', 'massa', 'carne'].includes(s.cat));
+        let total = temComida ? 15.00 : 0;
+        
+        // Soma apenas os preços dos extras (bebidas/sobremesas)
+        selecionados.forEach(s => {
+            if(s.cat === 'extra') total += s.preco;
+        });
+
+        document.getElementById('total-txt').innerText = `R$ ${total.toFixed(2)}`;
+        document.getElementById('resumo-qtd').innerText = `${selecionados.length} itens no carrinho`;
+    }
+
+    function enviarPedido() {
+        if(selecionados.length === 0) return alert("Selecione os itens!");
+        
+        const total = document.getElementById('total-txt').innerText;
+        let msg = `*NOVO PEDIDO - SABOR & CIA*%0A`;
+        msg += `----------------------------%0A`;
+        msg += `*ITENS:*%0A- ` + selecionados.map(s => s.nome).join('%0A- ') + `%0A`;
+        msg += `----------------------------%0A`;
+        msg += `*TOTAL: ${total}*%0A%0A`;
+        msg += `_Agendamento para o Final de Semana._`;
+        
+        window.open(`https://wa.me/5547997909412?text=${msg}`);
+    }
+
+    renderMenu();
 </script>
 
 </body>
 </html>
-                
-        
